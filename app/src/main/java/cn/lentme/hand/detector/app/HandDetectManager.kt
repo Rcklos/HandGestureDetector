@@ -6,6 +6,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.text.BoringLayout
+import cn.lentme.hand.detector.entity.HandDetectResult
+import cn.lentme.hand.detector.entity.Vector2
 import cn.lentme.mediapipe.handlandmark.HandDetector
 import cn.lentme.mediapipe.handlandmark.data.HandLandmark
 import kotlin.math.acos
@@ -24,10 +26,14 @@ class HandDetectManager(context: Context) {
 
     fun detectAndDraw(bitmap: Bitmap): HandDetectResult {
         val landmark = detector.process(bitmap)
-        if (landmark.isEmpty()) return HandDetectResult(bitmap, ArrayList())
+        if (landmark.isEmpty()) return HandDetectResult(bitmap, ArrayList(), ArrayList())
         val resultBitmap = showLandmarks(bitmap, landmark)
         val angles = computeHandAngle(landmark)
-        return HandDetectResult(resultBitmap, angles)
+        val points = ArrayList<Vector2>()
+        landmark.forEach {
+            points.add(Vector2(it.x, it.y))
+        }
+        return HandDetectResult(resultBitmap, angles, points)
     }
 
     private fun computeHandAngle(landmarks: List<HandLandmark>): List<Double> {
@@ -89,9 +95,12 @@ class HandDetectManager(context: Context) {
         else if (isStraight(angles[0]) && isStraight(angles[1]) &&
             isStraight(angles[2]) && isStraight(angles[3]) && isStraight(angles[4]))
             "五"
-        else if(isStraight(angles[0]) && isBent(angles[1]) && isBent(angles[2])
-            && isBent(angles[3]) && isStraight(angles[4]))
+        else if(isStraight(angles[0]) && isBent(angles[1]) && isBent(angles[2]) &&
+            isBent(angles[3]) && isStraight(angles[4]))
             "六"
+        else if(isBent(angles[0]) && isBent(angles[1]) && isStraight(angles[2]) &&
+                isBent(angles[3]) && isBent(angles[4]))
+            "友好手势"
         else
             "Other"
 
@@ -151,7 +160,6 @@ class HandDetectManager(context: Context) {
     }
 
     companion object {
-        data class HandDetectResult(val bitmap: Bitmap, val angles: List<Double>)
 //        private const val TAG = "Hand detection"
 //        private const val REQUEST_IMAGE_CAPTURE = 1
 

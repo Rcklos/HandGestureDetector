@@ -3,22 +3,17 @@ package cn.lentme.hand.detector.ui
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.os.Build
-import android.view.Surface
+import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888
-import androidx.camera.core.Preview
-import androidx.camera.core.impl.ImageAnalysisConfig
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import cn.lentme.hand.detector.app.App
-import cn.lentme.hand.detector.app.HandDetectManager
 import cn.lentme.hand.detector.databinding.ActivityMainBinding
 import cn.lentme.hand.detector.request.viewmodel.MainViewModel
+import cn.lentme.hand.detector.utils.ImageUtil
 import cn.lentme.mvvm.base.BaseActivity
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import java.util.concurrent.ExecutorService
@@ -30,10 +25,9 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
 
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var bitmapBuffer: Bitmap
-    private lateinit var handDetectManager: HandDetectManager
+
 
     override fun initData() {
-        handDetectManager = HandDetectManager(this)
         cameraExecutor = Executors.newSingleThreadExecutor()
         // Request camera permissions
         if (allPermissionsGranted()) {
@@ -44,43 +38,19 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
         }
     }
 
+    override fun initUI() {
+        mViewModel.gesture.observe(this) { title = it }
+    }
+
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-            val imageAnalysis = ImageAnalysis.Builder()
-                .setOutputImageFormat(OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-//                .setTargetRotation(Surface.ROTATION_90)
-                .setImageQueueDepth(1)
-                .build()
-            imageAnalysis.setAnalyzer(cameraExecutor) {
-                if(!::bitmapBuffer.isInitialized) {
-                    bitmapBuffer = Bitmap.createBitmap(it.width, it.height,
-                        Bitmap.Config.ARGB_8888)
-                }
-                it.use { image -> bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
-                val matrix = Matrix()
-                matrix.setRotate(90f)
-                val bitmap = Bitmap.createBitmap(bitmapBuffer, 0, 0,
-                    bitmapBuffer.width, bitmapBuffer.height, matrix, true)
-
-                val handDetectResult = handDetectManager.detectAndDraw(bitmap)
-                val resultBitmap = handDetectResult.bitmap
-                val angles = handDetectResult.angles
-
-                runOnUiThread {
-                    mViewModel.gesture.value =
-                        handDetectManager.computeHandGesture(angles)
-                    mBinding.mainSurface.setImageBitmap(resultBitmap)
-                }
-            }
-
+            val imageAnalysis = buildImageAnalysis()
+            imageAnalysis.setAnalyzer(cameraExecutor, buildImageAnalyzer())
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
             try {
                 cameraProvider.unbindAll()
-//                cameraProvider.bindToLifecycle(this,
-//                    cameraSelector, preview, imageAnalysis)
                 cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -88,8 +58,35 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    override fun initUI() {
-        mViewModel.gesture.observe(this) { title = it }
+    private fun buildImageAnalysis() = ImageAnalysis.Builder()
+        .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+        .setImageQueueDepth(1)
+        .build()
+
+    private fun buildImageAnalyzer() = ImageAnalysis.Analyzer {
+        if(!::bitmapBuffer.isInitialized) {
+            bitmapBuffer = Bitmap.createBitmap(it.width, it.height,
+                Bitmap.Config.ARGB_8888)
+        }
+        it.use { image -> bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
+        val bitmap = ImageUtil.createRotateBitmap(bitmapBuffer, 90f)
+        val handDetectResult = mViewModel.detectHandAndDraw(bitmap)
+        val resultBitmap = handDetectResult.bitmap
+        val angles = handDetectResult.angles
+        val points = handDetectResult.points
+        val gesture = mViewModel.computeHandGesture(angles)
+
+        // 手势结果判断
+        if (gesture == "一") {
+            Log.d(TAG, "gesture ===> 1")
+            ImageUtil.drawCircle(resultBitmap, points[8].x, points[8].y, 0.1f)
+        }
+
+        runOnUiThread {
+            mViewModel.gesture.value = gesture
+            mBinding.mainSurface.setImageBitmap(resultBitmap)
+        }
     }
 
     override fun onDestroy() {
@@ -118,7 +115,7 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
     }
 
     companion object {
-        private const val TAG = "CameraXApp"
+        private const val TAG = "CameraMainActivity"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS =
