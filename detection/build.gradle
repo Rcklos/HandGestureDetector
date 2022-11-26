@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace 'cn.lentme.mediapipe.handlandmark'
+    namespace 'cn.lentme.detection'
     compileSdk 33
 
     defaultConfig {
@@ -39,7 +39,6 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
 
-
-    implementation 'org.tensorflow:tensorflow-lite-support:0.2.0'
-    implementation 'org.tensorflow:tensorflow-lite-gpu:2.5.0'
+    implementation 'org.tensorflow:tensorflow-lite:2.4.0'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:2.4.0'
 }

@@ -16,3 +16,4 @@ rootProject.name = "HandGestureDetector"
 include ':app'
 include ':mvvm'
 include ':handlandmark'
+include ':detection'

@@ -5,4 +5,5 @@ import cn.lentme.mvvm.base.BaseViewModel
 
 class MainViewModel: BaseViewModel() {
     val hello by lazy { MutableLiveData("hello world") }
+    val gesture by lazy { MutableLiveData("None") }
 }

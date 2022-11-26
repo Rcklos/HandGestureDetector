@@ -15,6 +15,7 @@ import androidx.camera.core.impl.ImageAnalysisConfig
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import cn.lentme.hand.detector.app.App
 import cn.lentme.hand.detector.app.HandDetectManager
 import cn.lentme.hand.detector.databinding.ActivityMainBinding
 import cn.lentme.hand.detector.request.viewmodel.MainViewModel
@@ -47,12 +48,6 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-//            val preview = Preview.Builder()
-//                .build()
-//                .also {
-//                    it.setSurfaceProvider(mBinding.mainSurface.surfaceProvider)
-//                }
-
             val imageAnalysis = ImageAnalysis.Builder()
                 .setOutputImageFormat(OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -70,9 +65,13 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
                 val bitmap = Bitmap.createBitmap(bitmapBuffer, 0, 0,
                     bitmapBuffer.width, bitmapBuffer.height, matrix, true)
 
-                val resultBitmap = handDetectManager.detectAndDraw(bitmap)
+                val handDetectResult = handDetectManager.detectAndDraw(bitmap)
+                val resultBitmap = handDetectResult.bitmap
+                val angles = handDetectResult.angles
 
                 runOnUiThread {
+                    mViewModel.gesture.value =
+                        handDetectManager.computeHandGesture(angles)
                     mBinding.mainSurface.setImageBitmap(resultBitmap)
                 }
             }
@@ -90,6 +89,7 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
     }
 
     override fun initUI() {
+        mViewModel.gesture.observe(this) { title = it }
     }
 
     override fun onDestroy() {
