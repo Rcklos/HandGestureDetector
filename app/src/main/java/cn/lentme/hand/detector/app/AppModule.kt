@@ -1,5 +1,6 @@
 package cn.lentme.hand.detector.app
 
+import cn.lentme.hand.detector.request.repository.HandSelectorRepository
 import cn.lentme.hand.detector.request.viewmodel.*
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -8,10 +9,11 @@ import org.koin.dsl.module
  * Created by rcklos on 2022/5/15 03点02分
  */
 val repositoryModel = module {
+    single { HandSelectorRepository() }
 }
 
 val viewModelModule = module {
-    viewModel { MainViewModel() }
+    viewModel { MainViewModel(get()) }
 }
 
 val appModule = listOf(viewModelModule, repositoryModel)

@@ -3,6 +3,7 @@ package cn.lentme.hand.detector.ui
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.RectF
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
@@ -40,6 +41,11 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
 
     override fun initUI() {
         mViewModel.gesture.observe(this) { title = it }
+        mViewModel.selected.observe(this) {
+            it?.let {
+                mBinding.mainSelected.setImageBitmap(it)
+            }
+        }
     }
 
     private fun startCamera() {
@@ -71,19 +77,25 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
         }
         it.use { image -> bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
         val bitmap = ImageUtil.createRotateBitmap(bitmapBuffer, 90f)
-        val handDetectResult = mViewModel.detectHandAndDraw(bitmap)
-        val resultBitmap = handDetectResult.bitmap
-        val angles = handDetectResult.angles
-        val points = handDetectResult.points
+        val result = mViewModel.detectHandAndDraw(bitmap)
+        val resultBitmap = result.bitmap
+        val angles = result.angles
+        val points = result.points
         val gesture = mViewModel.computeHandGesture(angles)
 
         // 手势结果判断
-        if (gesture == "一") {
-            Log.d(TAG, "gesture ===> 1")
-            ImageUtil.drawCircle(resultBitmap, points[8].x, points[8].y, 0.1f)
+//        if (gesture == "一") {
+//            Log.d(TAG, "gesture ===> 1")
+//            ImageUtil.drawArc(resultBitmap, points[8].x, points[8].y, 0.05f, 210f)
+//        }
+        val rectF = mViewModel.updateHandSelector(resultBitmap, result, gesture)
+        var cropBitmap: Bitmap? = null
+        rectF?.let { _ ->
+            cropBitmap = ImageUtil.createBitmap(bitmap, rectF)
         }
 
         runOnUiThread {
+            cropBitmap?.let { bmp -> mViewModel.selected.value = bmp }
             mViewModel.gesture.value = gesture
             mBinding.mainSurface.setImageBitmap(resultBitmap)
         }

@@ -98,9 +98,12 @@ class HandDetectManager(context: Context) {
         else if(isStraight(angles[0]) && isBent(angles[1]) && isBent(angles[2]) &&
             isBent(angles[3]) && isStraight(angles[4]))
             "六"
-        else if(isBent(angles[0]) && isBent(angles[1]) && isStraight(angles[2]) &&
+        else if(isThumbBent(angles[0]) && isBent(angles[1]) && isStraight(angles[2]) &&
                 isBent(angles[3]) && isBent(angles[4]))
             "友好手势"
+        else if (isStraight(angles[0]) && isStraight(angles[1]) &&
+            isBent(angles[2]) && isBent(angles[3]) && isBent(angles[4]))
+            "枪"
         else
             "Other"
 
@@ -124,11 +127,11 @@ class HandDetectManager(context: Context) {
         val canvas = Canvas(drawBitmap)
         val penStroke = Paint().apply {
             color = Color.GREEN
-            strokeWidth = 20f
+            strokeWidth = 5f
         }
         val penPoint = Paint().apply {
             color = Color.RED
-            strokeWidth = 20f
+            strokeWidth = 2f
             style = Paint.Style.FILL
         }
         val lines = mutableListOf<Float>()
