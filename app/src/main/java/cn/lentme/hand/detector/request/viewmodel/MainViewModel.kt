@@ -5,20 +5,22 @@ import android.graphics.RectF
 import android.util.Size
 import androidx.lifecycle.MutableLiveData
 import cn.lentme.hand.detector.app.App
-import cn.lentme.hand.detector.app.HandDetectManager
+import cn.lentme.hand.detector.hand.legecy.HandDetectManager
 import cn.lentme.hand.detector.entity.HandDetectResult
+import cn.lentme.hand.detector.hand.AbstractHandDetectManager
 import cn.lentme.hand.detector.request.repository.HandSelectorRepository
 import cn.lentme.mvvm.base.BaseViewModel
 
-class MainViewModel(private val repository: HandSelectorRepository): BaseViewModel() {
+class MainViewModel(private val repository: HandSelectorRepository,
+                    private val handDetectManager: AbstractHandDetectManager): BaseViewModel() {
     val hello by lazy { MutableLiveData("hello world") }
     val gesture by lazy { MutableLiveData("None") }
     val selected by lazy { MutableLiveData<Bitmap>(null)}
 
-    private val handDetectManager = HandDetectManager(App.instance.applicationContext)
+//    private val handDetectManager = HandDetectManager(App.instance.applicationContext)
 
     fun detectHandAndDraw(bitmap: Bitmap) = handDetectManager.detectAndDraw(bitmap)
-    fun computeHandGesture(angles: List<Double>) = handDetectManager.computeHandGesture(angles)
+    fun computeHandGesture(angles: List<Double>) = AbstractHandDetectManager.computeHandGesture(angles)
     fun updateHandSelector(bitmap: Bitmap, result: HandDetectResult,
                            gesture: String): RectF? {
         val canvas = Canvas(bitmap)
