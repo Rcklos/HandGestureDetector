@@ -5,10 +5,13 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.RectF
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -80,7 +83,7 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
         val result = mViewModel.detectHandAndDraw(bitmap)
         val resultBitmap = result.bitmap
         val angles = result.angles
-        val points = result.points
+//        val points = result.points
         val gesture = mViewModel.computeHandGesture(angles)
 
         // 手势结果判断
