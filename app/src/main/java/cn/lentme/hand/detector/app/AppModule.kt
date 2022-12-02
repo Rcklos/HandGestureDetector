@@ -1,7 +1,7 @@
 package cn.lentme.hand.detector.app
 
 import cn.lentme.hand.detector.hand.AbstractHandDetectManager
-import cn.lentme.hand.detector.hand.legecy.HandDetectManager
+import cn.lentme.hand.detector.hand.HandDetectManager
 import cn.lentme.hand.detector.request.repository.HandSelectorRepository
 import cn.lentme.hand.detector.request.viewmodel.*
 import org.koin.androidx.viewmodel.dsl.viewModel

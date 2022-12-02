@@ -5,6 +5,7 @@
 #include "opencv2/core.hpp"
 #include "opencv2/imgproc.hpp"
 
+
 void bitmapToMat(JNIEnv *env, jobject bitmap, cv::Mat &dst);
 
 void matToBitmap(JNIEnv *env, cv::Mat &src, jobject bitmap);

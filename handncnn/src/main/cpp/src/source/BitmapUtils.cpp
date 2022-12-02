@@ -9,7 +9,7 @@ void bitmapToMat(JNIEnv *env, jobject bitmap, Mat &dst) {
     void *pixels = 0;
 
     try {
-        LOGI("nBitmapToMat");
+//        LOGI("nBitmapToMat");
         CV_Assert(AndroidBitmap_getInfo(env, bitmap, &info) >= 0);
         CV_Assert(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 ||
                   info.format == ANDROID_BITMAP_FORMAT_RGB_565);
@@ -17,7 +17,7 @@ void bitmapToMat(JNIEnv *env, jobject bitmap, Mat &dst) {
         CV_Assert(pixels);
         dst.create(info.height, info.width, CV_8UC4);
         if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
-            LOGI("nBitmapToMat: RGBA_8888 -> CV_8UC4");
+//            LOGI("nBitmapToMat: RGBA_8888 -> CV_8UC4");
             Mat tmp(info.height, info.width, CV_8UC4, pixels);
             //if (needUnPremultiplyAlpha) cvtColor(tmp, dst, COLOR_mRGBA2RGBA);
             //else
@@ -51,7 +51,7 @@ void matToBitmap(JNIEnv *env, cv::Mat &src, jobject bitmap) {
     void *pixels = 0;
 
     try {
-        LOGI("nMatToBitmap");
+//        LOGI("nMatToBitmap");
         CV_Assert(AndroidBitmap_getInfo(env, bitmap, &info) >= 0);
         CV_Assert(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 ||
                   info.format == ANDROID_BITMAP_FORMAT_RGB_565);
@@ -66,10 +66,10 @@ void matToBitmap(JNIEnv *env, cv::Mat &src, jobject bitmap) {
                 LOGI("nMatToBitmap: CV_8UC1 -> RGBA_8888");
                 cvtColor(src, tmp, COLOR_GRAY2RGBA);
             } else if (src.type() == CV_8UC3) {
-                LOGI("nMatToBitmap: CV_8UC3 -> RGBA_8888");
+//                LOGI("nMatToBitmap: CV_8UC3 -> RGBA_8888");
                 cvtColor(src, tmp, COLOR_RGB2RGBA);
             } else if (src.type() == CV_8UC4) {
-                LOGI("nMatToBitmap: CV_8UC4 -> RGBA_8888");
+//                LOGI("nMatToBitmap: CV_8UC4 -> RGBA_8888");
                 //if (needPremultiplyAlpha) cvtColor(src, tmp, COLOR_RGBA2mRGBA);
                 //else
                 src.copyTo(tmp);
