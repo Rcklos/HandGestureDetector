@@ -13,11 +13,9 @@ import cn.lentme.mvvm.base.BaseViewModel
 
 class MainViewModel(private val repository: HandSelectorRepository,
                     private val handDetectManager: AbstractHandDetectManager): BaseViewModel() {
-    val hello by lazy { MutableLiveData("hello world") }
+
     val gesture by lazy { MutableLiveData("None") }
     val selected by lazy { MutableLiveData<Bitmap>(null)}
-
-//    private val handDetectManager = HandDetectManager(App.instance.applicationContext)
 
     fun detectHandAndDraw(bitmap: Bitmap) = handDetectManager.detectAndDraw(bitmap)
     fun computeHandGesture(angles: List<Double>) = AbstractHandDetectManager.computeHandGesture(angles)
