@@ -10,7 +10,7 @@ class NCCNHandDetector {
      * which is packaged with this application.
      */
     external fun load(assetManager: AssetManager): Boolean
-    external fun detect(bitmap: Bitmap, result: DetectResult)
+    external fun detect(bitmap: Bitmap): DetectResult
 
     companion object {
         // Used to load the 'handncnn' library on application startup.

@@ -76,22 +76,38 @@ static int draw_fps(cv::Mat& rgb)
     return 0;
 }
 
-extern "C"
-JNIEXPORT void JNICALL
-Java_cn_lentme_mediapipe_ncnn_NCCNHandDetector_detect(JNIEnv *env, jobject thiz, jobject bitmap,
-                                                      jobject result) {
-    cv::Mat rgb;
-    bitmapToMat(env, bitmap, rgb);
-    cv::cvtColor(rgb, rgb, cv::COLOR_RGBA2RGB);
-    std::vector<PalmObject> objects;
-    if(g_hand) {
-        std::vector<PalmObject> objects;
-        g_hand->detect(rgb, objects);
-        g_hand->draw(rgb, objects);
-        draw_fps(rgb);
-        matToBitmap(env, rgb, bitmap);
-    } else {
-        LOGI("g_hand ====== null");
+jclass newJListClass(JNIEnv *jniEnv) {
+    jclass clazz = jniEnv->FindClass("java/util/ArrayList");
+    if (clazz == NULL) {
+        LOGE("ArrayList class is null");
+        return NULL;
+    }
+    return clazz;
+}
+
+void buildArrayPoint2F(JNIEnv *env, PalmObject &object, jobject &list) {
+    jclass jListClass = newJListClass(env);
+    jmethodID jAddMethod = env->
+            GetMethodID(jListClass, "add", "(Ljava/lang/Object;)Z");
+    jclass jPoint2FClass = env->FindClass("cn/lentme/mediapipe/ncnn/Point2f");
+    jmethodID jPoint2FConstructor = env->
+            GetMethodID(jPoint2FClass, "<init>", "(FF)V");
+    for(int i = 0; i < object.skeleton.size(); i++) {
+        jobject jPoint2F = env->NewObject(jPoint2FClass, jPoint2FConstructor,
+                                          object.skeleton[i].x, object.skeleton[i].y);
+        env->CallBooleanMethod(list, jAddMethod, jPoint2F);
+    }
+}
+
+void buildArrayObject(JNIEnv *env, std::vector<PalmObject> &objects, jobject &list) {
+    jclass jListClass = newJListClass(env);
+    jmethodID jListConstructor = env->GetMethodID(jListClass, "<init>", "()V");
+    jmethodID jAddMethod = env->
+            GetMethodID(jListClass, "add", "(Ljava/lang/Object;)Z");
+    for(auto object: objects) {
+        jobject newList = env->NewObject(jListClass, jListConstructor);
+        buildArrayPoint2F(env, object, newList);
+        env->CallBooleanMethod(list, jAddMethod, newList);
     }
 }
 
@@ -123,4 +139,34 @@ Java_cn_lentme_mediapipe_ncnn_NCCNHandDetector_load(JNIEnv *env, jobject thiz,
     }
 
     return JNI_TRUE;
+}
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_cn_lentme_mediapipe_ncnn_NCCNHandDetector_detect(JNIEnv *env, jobject thiz, jobject bitmap) {
+    cv::Mat rgb;
+    bitmapToMat(env, bitmap, rgb);
+    cv::cvtColor(rgb, rgb, cv::COLOR_RGBA2RGB);
+    std::vector<PalmObject> objects;
+
+    jclass jListClass = newJListClass(env);
+    jmethodID jListConstructor = env->GetMethodID(jListClass,
+                                                  "<init>", ("()V"));
+    jclass jResultClass = env->FindClass("cn/lentme/mediapipe/ncnn/DetectResult");
+    jmethodID jResultConstructor = env->
+            GetMethodID(jResultClass, "<init>", "(Ljava/util/List;)V");
+    jobject jList = env->NewObject(jListClass, jListConstructor);
+
+    if(g_hand) {
+        std::vector<PalmObject> objects;
+        g_hand->detect(rgb, objects);
+        g_hand->draw(rgb, objects);
+        draw_fps(rgb);
+        matToBitmap(env, rgb, bitmap);
+
+        buildArrayObject(env, objects, jList);
+    } else {
+        LOGI("g_hand ====== null");
+    }
+    jobject jResult = env->NewObject(jResultClass, jResultConstructor, jList);
+    return jResult;
 }
