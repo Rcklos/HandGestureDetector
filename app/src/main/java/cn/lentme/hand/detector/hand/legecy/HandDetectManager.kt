@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.util.Log
 import cn.lentme.hand.detector.entity.HandDetectResult
 import cn.lentme.hand.detector.entity.Vector2
 import cn.lentme.hand.detector.hand.AbstractHandDetectManager
