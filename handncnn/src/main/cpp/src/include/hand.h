@@ -19,15 +19,6 @@
 #include <net.h>
 #include "landmark.h"
 
-struct Object
-{
-    cv::Rect_<float> rect;
-    int label;
-    float prob;
-    cv::Point2f pts[21];
-   
-};
-
 struct PalmObject
 {
     float  score;
