@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/handlandmark" />
             <option value="$PROJECT_DIR$/handncnn" />
             <option value="$PROJECT_DIR$/mvvm" />
+            <option value="$PROJECT_DIR$/ncnn" />
             <option value="$PROJECT_DIR$/yoloncnn" />
           </set>
         </option>
