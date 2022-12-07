@@ -3,10 +3,12 @@ package cn.lentme.hand.detector.ui
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import android.util.Size
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -16,12 +18,16 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import cn.lentme.hand.detector.databinding.ActivityMainBinding
+import cn.lentme.hand.detector.detect.AbstractYoloDetectManager
+import cn.lentme.hand.detector.entity.Vector2
 import cn.lentme.hand.detector.request.viewmodel.MainViewModel
 import cn.lentme.hand.detector.utils.ImageUtil
 import cn.lentme.mvvm.base.BaseActivity
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
     override fun fetchBinding() = ActivityMainBinding.inflate(layoutInflater)
@@ -29,6 +35,9 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
 
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var bitmapBuffer: Bitmap
+    private val rectFBuffer = RectF()
+    // 还没啥用
+    private var selected = false
 
 
     override fun initData() {
@@ -79,11 +88,11 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
                 Bitmap.Config.ARGB_8888)
         }
         it.use { image -> bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
+
         val bitmap = ImageUtil.createRotateBitmap(bitmapBuffer, 90f)
         val result = mViewModel.detectHandAndDraw(bitmap)
         val resultBitmap = result.bitmap
         val angles = result.angles
-//        val points = result.points
         val gesture = mViewModel.computeHandGesture(angles)
 
         // 手势结果判断
@@ -94,8 +103,33 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
         val rectF = mViewModel.updateHandSelector(resultBitmap, result, gesture)
         var cropBitmap: Bitmap? = null
         rectF?.let { _ ->
+            rectFBuffer.left = rectF.left
+            rectFBuffer.top = rectF.top
+            rectFBuffer.right = rectF.right
+            rectFBuffer.bottom = rectF.bottom
+            selected = true
             cropBitmap = ImageUtil.createBitmap(bitmap, rectF)
+
+            // 获取Yolo数据
+            val yoloResult = mViewModel.detectYolo(bitmap, Size(bitmap.width, bitmap.height))
+            if(yoloResult.isNotEmpty()) {
+                val center = Vector2(rectF.right - rectF.left, rectF.bottom - rectF.top)
+                yoloResult.sortedBy { yoloObject ->
+                    val yoloCenter = Vector2(
+                        yoloObject .rect.right - yoloObject.rect.left ,
+                        yoloObject.rect.bottom - yoloObject.rect.top
+                    )
+                    sqrt((yoloCenter.x - center.x).pow(2) +
+                            (yoloCenter.y - center.y).pow(2))
+                }
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity,
+                        "select: ${AbstractYoloDetectManager.labelMap[yoloResult[0].label]}",
+                        Toast.LENGTH_SHORT).show()
+                }
+            }
         }
+
 
         runOnUiThread {
             cropBitmap?.let { bmp -> mViewModel.selected.value = bmp }
