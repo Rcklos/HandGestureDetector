@@ -4,15 +4,15 @@ import android.graphics.Canvas
 import android.graphics.RectF
 import android.util.Size
 import androidx.lifecycle.MutableLiveData
-import cn.lentme.hand.detector.app.App
-import cn.lentme.hand.detector.hand.legecy.HandDetectManager
 import cn.lentme.hand.detector.entity.HandDetectResult
-import cn.lentme.hand.detector.hand.AbstractHandDetectManager
+import cn.lentme.hand.detector.detect.AbstractHandDetectManager
+import cn.lentme.hand.detector.detect.AbstractYoloDetectManager
 import cn.lentme.hand.detector.request.repository.HandSelectorRepository
 import cn.lentme.mvvm.base.BaseViewModel
 
 class MainViewModel(private val repository: HandSelectorRepository,
-                    private val handDetectManager: AbstractHandDetectManager): BaseViewModel() {
+                    private val handDetectManager: AbstractHandDetectManager,
+                    private val yoloDetectManager: AbstractYoloDetectManager): BaseViewModel() {
 
     val gesture by lazy { MutableLiveData("None") }
     val selected by lazy { MutableLiveData<Bitmap>(null)}
@@ -25,4 +25,5 @@ class MainViewModel(private val repository: HandSelectorRepository,
         val screenSize = Size(bitmap.width, bitmap.height)
         return repository.updateHandSelector(canvas, screenSize, result, gesture)
     }
+    fun detectYolo(bitmap: Bitmap, screenSize: Size) = yoloDetectManager.detect(bitmap, screenSize)
 }

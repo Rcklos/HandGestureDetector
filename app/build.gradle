@@ -33,6 +33,7 @@ android {
     buildFeatures {
         viewBinding true
     }
+    ndkVersion '21.4.7075529'
 }
 
 dependencies {
@@ -58,4 +59,5 @@ dependencies {
     implementation project(':mvvm')
     implementation project(':handlandmark')
     implementation project(':handncnn')
+    implementation project(':yoloncnn')
 }

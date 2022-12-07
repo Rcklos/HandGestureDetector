@@ -1,7 +1,9 @@
 package cn.lentme.hand.detector.app
 
-import cn.lentme.hand.detector.hand.AbstractHandDetectManager
-import cn.lentme.hand.detector.hand.HandDetectManager
+import cn.lentme.hand.detector.detect.AbstractHandDetectManager
+import cn.lentme.hand.detector.detect.AbstractYoloDetectManager
+import cn.lentme.hand.detector.detect.HandDetectManager
+import cn.lentme.hand.detector.detect.YoloDetectManager
 import cn.lentme.hand.detector.request.repository.HandSelectorRepository
 import cn.lentme.hand.detector.request.viewmodel.*
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -19,10 +21,14 @@ val repositoryModel = module {
         bind<AbstractHandDetectManager>()
         createdAtStart()
     }
+    single { YoloDetectManager(App.instance.applicationContext) } withOptions {
+        bind<AbstractYoloDetectManager>()
+        createdAtStart()
+    }
 }
 
 val viewModelModule = module {
-    viewModel { MainViewModel(get(), get()) }
+    viewModel { MainViewModel(get(), get(), get()) }
 }
 
 val appModule = listOf(viewModelModule, repositoryModel)
