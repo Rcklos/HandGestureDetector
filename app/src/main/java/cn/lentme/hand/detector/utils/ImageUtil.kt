@@ -6,12 +6,17 @@ import androidx.core.view.ContentInfoCompat.Flags
 
 object ImageUtil {
 
-    fun createBitmap(src: Bitmap, rectF: RectF): Bitmap {
-        val x = rectF.left * src.width
-        val y = rectF.top * src.height
-        val width = (rectF.right - rectF.left) * src.width
-        val height = (rectF.bottom - rectF.top) * src.height
-        return Bitmap.createBitmap(src, x.toInt(), y.toInt(), width.toInt(), height.toInt())
+    fun createBitmap(src: Bitmap, rectF: RectF): Bitmap? {
+        try {
+            val x = rectF.left * src.width
+            val y = rectF.top * src.height
+            val width = (rectF.right - rectF.left) * src.width
+            val height = (rectF.bottom - rectF.top) * src.height
+            return Bitmap.createBitmap(src, x.toInt(), y.toInt(), width.toInt(), height.toInt())
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
     }
 
     fun drawArc(canvas: Canvas, size: Size, x: Float, y: Float, radius: Float, endAngle: Float) {
@@ -49,5 +54,24 @@ object ImageUtil {
         matrix.setRotate(rotate)
         return Bitmap.createBitmap(bitmap, 0, 0,
             bitmap.width, bitmap.height, matrix, true)
+    }
+
+    fun markYolo(bitmap: Bitmap, rectF: RectF, label: String) {
+        val size = Size(bitmap.width, bitmap.height)
+        val dRectF = RectF(
+            rectF.left * size.width,
+            rectF.top * size.height,
+            rectF.right * size.width,
+            rectF.bottom * size.height
+        )
+
+        val canvas = Canvas(bitmap)
+        val paint = buildPaint()
+        paint.color = Color.GREEN
+        canvas.drawRect(dRectF, paint)
+        paint.color = Color.RED
+        paint.textSize = 16f
+        paint.strokeWidth = 1f
+        canvas.drawText(label, dRectF.left, dRectF.top, paint)
     }
 }

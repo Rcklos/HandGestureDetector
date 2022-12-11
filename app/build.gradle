@@ -58,6 +58,7 @@ dependencies {
 
     implementation project(':mvvm')
     implementation project(':handlandmark')
-    implementation project(':handncnn')
-    implementation project(':yoloncnn')
+//    implementation project(':handncnn')
+    implementation project(':allncnn')
+//    implementation project(':yoloncnn')
 }

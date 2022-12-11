@@ -2,11 +2,12 @@ package cn.lentme.hand.detector.detect
 
 import android.content.Context
 import android.graphics.Bitmap
+import cn.lentme.allncnn.NCNNService
 import cn.lentme.hand.detector.entity.HandDetectResult
 import kotlin.math.acos
 import kotlin.math.sqrt
 
-abstract class AbstractHandDetectManager(context: Context) {
+abstract class AbstractHandDetectManager() {
 //    abstract fun detect(bitmap: Bitmap)
     abstract fun detectAndDraw(bitmap: Bitmap): HandDetectResult
 

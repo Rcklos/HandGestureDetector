@@ -1,23 +1,20 @@
 package cn.lentme.hand.detector.detect
 
-import android.content.Context
 import android.graphics.Bitmap
+import cn.lentme.allncnn.NCNNService
+import cn.lentme.allncnn.Point2f
 import cn.lentme.hand.detector.entity.HandDetectResult
 import cn.lentme.hand.detector.entity.Vector2
-import cn.lentme.mediapipe.ncnn.NCCNHandDetector
-import cn.lentme.mediapipe.ncnn.Point2f
 
-class HandDetectManager(context: Context): AbstractHandDetectManager(context) {
+class HandDetectManager(val service: NCNNService): AbstractHandDetectManager() {
 
-    private val detector = NCCNHandDetector()
-
-    init {
-        detector.load(context.assets)
-    }
+//    init {
+//        this.service.loadHandDetector(context.assets)
+//    }
 
     override fun detectAndDraw(bitmap: Bitmap): HandDetectResult {
         val resultBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val result = detector.detect(resultBitmap)
+        val result = this.service.detectHand(resultBitmap)
         if(result.landmark.isNotEmpty()) {
 //            Log.d(TAG, "detect result size ------------> ${result.landmark.size}")
             val angles = computeHandAngle(result.landmark[0])

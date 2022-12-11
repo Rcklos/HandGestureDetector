@@ -25,5 +25,5 @@ class MainViewModel(private val repository: HandSelectorRepository,
         val screenSize = Size(bitmap.width, bitmap.height)
         return repository.updateHandSelector(canvas, screenSize, result, gesture)
     }
-    fun detectYolo(bitmap: Bitmap, screenSize: Size) = yoloDetectManager.detect(bitmap, screenSize)
+    fun detectYolo(bitmap: Bitmap) = yoloDetectManager.detect(bitmap)
 }

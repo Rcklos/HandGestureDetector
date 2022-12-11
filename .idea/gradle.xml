@@ -10,6 +10,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/allncnn" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/detection" />
             <option value="$PROJECT_DIR$/handlandmark" />

@@ -113,8 +113,8 @@ void buildArrayObject(JNIEnv *env, std::vector<PalmObject> &objects, jobject &li
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_cn_lentme_mediapipe_ncnn_NCCNHandDetector_load(JNIEnv *env, jobject thiz,
-                                                    jobject asset_manager) {
+Java_cn_lentme_mediapipe_ncnn_NCCNHandDetector_loadHandDetector(JNIEnv *env, jobject thiz,
+                                                                jobject asset_manager) {
     AAssetManager* mgr = AAssetManager_fromJava(env, asset_manager);
     const char* palm_type = "palm-full";
     const int target_size_ = 192;
@@ -142,7 +142,7 @@ Java_cn_lentme_mediapipe_ncnn_NCCNHandDetector_load(JNIEnv *env, jobject thiz,
 }
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_cn_lentme_mediapipe_ncnn_NCCNHandDetector_detect(JNIEnv *env, jobject thiz, jobject bitmap) {
+Java_cn_lentme_mediapipe_ncnn_NCCNHandDetector_detectHand(JNIEnv *env, jobject thiz, jobject bitmap) {
     cv::Mat rgb;
     bitmapToMat(env, bitmap, rgb);
     cv::cvtColor(rgb, rgb, cv::COLOR_RGBA2RGB);
