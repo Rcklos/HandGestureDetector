@@ -43,7 +43,7 @@ Java_cn_lentme_yolo_ncnn_YoloNCNN_detect(JNIEnv *env, jobject thiz, jobject bitm
     jclass jRectF = env->FindClass("android/graphics/RectF");
     jmethodID jRectFConstructor = env->GetMethodID(jRectF, "<init>", "(FFFF)V");
     g_yolo->detect(rgb, objects);
-    g_yolo->draw(rgb, objects);
+//    g_yolo->draw(rgb, objects);
 
     jobject jList = env->NewObject(jListClass, jListConstructor);
     for(auto obj: objects) {

@@ -26,6 +26,8 @@ import cn.lentme.mvvm.base.BaseActivity
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.abs
+import kotlin.math.log
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -35,8 +37,10 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
 
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var bitmapBuffer: Bitmap
+
+    // yolo
     private val rectFBuffer = RectF()
-    // 还没啥用
+    private var labelBuffer = ""
     private var selected = false
 
 
@@ -52,7 +56,7 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
     }
 
     override fun initUI() {
-        mViewModel.gesture.observe(this) { title = it }
+//        mViewModel.gesture.observe(this) { title = it }
         mViewModel.selected.observe(this) {
             it?.let {
                 mBinding.mainSelected.setImageBitmap(it)
@@ -88,8 +92,11 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
                 Bitmap.Config.ARGB_8888)
         }
         it.use { image -> bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
-
         val bitmap = ImageUtil.createRotateBitmap(bitmapBuffer, 90f)
+
+        // 获取Yolo数据
+        if(selected) computeAndDrawYolo(bitmap)
+
         val result = mViewModel.detectHandAndDraw(bitmap)
         val resultBitmap = result.bitmap
         val angles = result.angles
@@ -109,25 +116,6 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
             rectFBuffer.bottom = rectF.bottom
             selected = true
             cropBitmap = ImageUtil.createBitmap(bitmap, rectF)
-
-            // 获取Yolo数据
-            val yoloResult = mViewModel.detectYolo(bitmap, Size(bitmap.width, bitmap.height))
-            if(yoloResult.isNotEmpty()) {
-                val center = Vector2(rectF.right - rectF.left, rectF.bottom - rectF.top)
-                yoloResult.sortedBy { yoloObject ->
-                    val yoloCenter = Vector2(
-                        yoloObject .rect.right - yoloObject.rect.left ,
-                        yoloObject.rect.bottom - yoloObject.rect.top
-                    )
-                    sqrt((yoloCenter.x - center.x).pow(2) +
-                            (yoloCenter.y - center.y).pow(2))
-                }
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity,
-                        "select: ${AbstractYoloDetectManager.labelMap[yoloResult[0].label]}",
-                        Toast.LENGTH_SHORT).show()
-                }
-            }
         }
 
 
@@ -136,6 +124,73 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
             mViewModel.gesture.value = gesture
             mBinding.mainSurface.setImageBitmap(resultBitmap)
         }
+    }
+
+    private fun computeAndDrawYolo(bitmap: Bitmap) {
+        var crop = ImageUtil.createBitmap(bitmap, rectFBuffer)
+        if(crop == null) {
+            selected = false
+            return
+        }
+        val yoloResult = mViewModel.detectYolo(crop)
+        if(yoloResult.isNotEmpty()) {
+            val center = Vector2(.5f, .5f)
+            if(yoloResult.isNotEmpty()) {
+                yoloResult.sortedBy { yoloObject ->
+                    val yoloCenter = Vector2(
+                        yoloObject .rect.right - yoloObject.rect.left ,
+                        yoloObject.rect.bottom - yoloObject.rect.top
+                    )
+                    sqrt((yoloCenter.x - center.x).pow(2) +
+                            (yoloCenter.y - center.y).pow(2))
+                }
+
+                val label = AbstractYoloDetectManager.labelMap[yoloResult[0].label]
+                val rectF = yoloResult[0].rect
+                logRectF("buffer", rectFBuffer)
+                logRectF("before", rectF)
+                // 更新rect buffer
+                val x = rectFBuffer.left * bitmap.width
+                val y = rectFBuffer.top * bitmap.height
+                rectF.left = (rectF.left + x) / bitmap.width
+                rectF.right = (rectF.right + x) / bitmap.width
+                rectF.top = (rectF.top + y) / bitmap.height
+                rectF.bottom = (rectF.bottom + y) / bitmap.height
+
+                crop = ImageUtil.createBitmap(bitmap, rectF)
+                runOnUiThread {
+                    crop?.let { mViewModel.selected.value = it }
+                }
+
+
+                logRectF("rectF", rectF)
+
+                ImageUtil.markYolo(bitmap, rectF, label)
+            }
+            runOnUiThread {
+                val msg = if(yoloResult.isEmpty()) "等待检测...." else
+                    AbstractYoloDetectManager.labelMap[yoloResult[0].label]
+                this.title = msg
+//                Toast.makeText(this@MainActivity,
+//                    "select: $msg",
+//                    Toast.LENGTH_SHORT).show()
+            }
+            // 没检测到就直接重置选择区域
+        } else selected = false
+
+    }
+
+    private fun logRectF(name: String, rectF: RectF) {
+        Log.d(TAG, "$name ---------> l: ${rectF.left}, t: ${rectF.top}, " +
+                "r: ${rectF.right}, b: ${rectF.bottom}")
+    }
+
+    private fun isRectIntersect(r1: RectF, r2: RectF): Boolean {
+        val dx = abs((r1.left + r1.right) / 2 - (r2.left + r2.right) / 2)
+        val dy = abs((r1.bottom + r1.top) / 2 - (r2.bottom + r2.top) / 2)
+        val hw = (r1.right - r1.left) / 2 + (r2.right - r2.left) / 2
+        val hy = (r1.bottom - r1.top) / 2 + (r2.bottom - r2.top) / 2
+        return dx <= hw && dy <= hy
     }
 
     override fun onDestroy() {

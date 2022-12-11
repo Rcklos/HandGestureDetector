@@ -1,5 +1,6 @@
 package cn.lentme.hand.detector.app
 
+import cn.lentme.allncnn.NCNNService
 import cn.lentme.hand.detector.detect.AbstractHandDetectManager
 import cn.lentme.hand.detector.detect.AbstractYoloDetectManager
 import cn.lentme.hand.detector.detect.HandDetectManager
@@ -16,12 +17,17 @@ import org.koin.dsl.module
  * Created by rcklos on 2022/5/15 03点02分
  */
 val repositoryModel = module {
+    single { NCNNService().apply {
+        loadHandDetector(App.instance.assets)
+        loadYoloDetector(App.instance.assets)
+    } }
+
     single { HandSelectorRepository() }
-    single { HandDetectManager(App.instance.applicationContext) } withOptions {
+    single { HandDetectManager(get()) } withOptions {
         bind<AbstractHandDetectManager>()
         createdAtStart()
     }
-    single { YoloDetectManager(App.instance.applicationContext) } withOptions {
+    single { YoloDetectManager(get()) } withOptions {
         bind<AbstractYoloDetectManager>()
         createdAtStart()
     }

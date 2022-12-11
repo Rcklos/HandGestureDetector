@@ -5,8 +5,8 @@ import android.graphics.Bitmap
 import android.util.Size
 import cn.lentme.hand.detector.entity.YoloDetectResult
 
-abstract class AbstractYoloDetectManager(context: Context) {
-    abstract fun detect(bitmap: Bitmap, screenSize: Size): List<YoloDetectResult>
+abstract class AbstractYoloDetectManager() {
+    abstract fun detect(bitmap: Bitmap): List<YoloDetectResult>
 
     companion object {
         val labelMap = listOf(
