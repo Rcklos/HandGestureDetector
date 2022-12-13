@@ -1,8 +1,10 @@
 package cn.lentme.hand.detector.utils
 
 import android.graphics.*
+import android.util.Log
 import android.util.Size
 import androidx.core.view.ContentInfoCompat.Flags
+import cn.lentme.hand.detector.ui.MainActivity
 
 object ImageUtil {
 
@@ -58,12 +60,7 @@ object ImageUtil {
 
     fun markYolo(bitmap: Bitmap, rectF: RectF, label: String) {
         val size = Size(bitmap.width, bitmap.height)
-        val dRectF = RectF(
-            rectF.left * size.width,
-            rectF.top * size.height,
-            rectF.right * size.width,
-            rectF.bottom * size.height
-        )
+        val dRectF = computeRealRectF(rectF, size)
 
         val canvas = Canvas(bitmap)
         val paint = buildPaint()
@@ -73,5 +70,26 @@ object ImageUtil {
         paint.textSize = 16f
         paint.strokeWidth = 1f
         canvas.drawText(label, dRectF.left, dRectF.top, paint)
+    }
+
+    fun copyRectF(des: RectF, src: RectF) {
+        des.left = src.left
+        des.top = src.top
+        des.right = src.right
+        des.bottom = src.bottom
+    }
+
+    fun computeRealRectF(rectF: RectF, size: Size): RectF {
+        return RectF(
+            rectF.left * size.width,
+            rectF.top * size.height,
+            rectF.right * size.width,
+            rectF.bottom * size.height
+        )
+    }
+
+    fun logRectF(TAG: String, name: String, rectF: RectF) {
+        Log.d(TAG, "$name ---------> l: ${rectF.left}, t: ${rectF.top}, " +
+                "r: ${rectF.right}, b: ${rectF.bottom}")
     }
 }
