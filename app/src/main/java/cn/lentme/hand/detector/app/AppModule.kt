@@ -22,6 +22,8 @@ val repositoryModel = module {
         loadYoloDetector(App.instance.assets)
     } }
 
+    single { TtsManager(App.instance) }
+
     single { HandSelectorRepository() }
     single { HandDetectManager(get()) } withOptions {
         bind<AbstractHandDetectManager>()
@@ -34,7 +36,7 @@ val repositoryModel = module {
 }
 
 val viewModelModule = module {
-    viewModel { MainViewModel(get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get()) }
 }
 
 val appModule = listOf(viewModelModule, repositoryModel)

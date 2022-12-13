@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import android.graphics.RectF
 import android.util.Size
 import androidx.lifecycle.MutableLiveData
+import cn.lentme.hand.detector.app.TtsManager
 import cn.lentme.hand.detector.entity.HandDetectResult
 import cn.lentme.hand.detector.detect.AbstractHandDetectManager
 import cn.lentme.hand.detector.detect.AbstractYoloDetectManager
@@ -12,10 +13,18 @@ import cn.lentme.mvvm.base.BaseViewModel
 
 class MainViewModel(private val repository: HandSelectorRepository,
                     private val handDetectManager: AbstractHandDetectManager,
-                    private val yoloDetectManager: AbstractYoloDetectManager): BaseViewModel() {
+                    private val yoloDetectManager: AbstractYoloDetectManager,
+                    private val ttsManager: TtsManager): BaseViewModel() {
 
     val gesture by lazy { MutableLiveData("None") }
-    val selected by lazy { MutableLiveData<Bitmap>(null)}
+    val cropBitmap by lazy { MutableLiveData<Bitmap>(null) }
+    val selected by lazy { MutableLiveData<Boolean>(false) }
+
+    fun setSelected(select: Boolean) {
+        launchUI {
+            selected.value = select
+        }
+    }
 
     fun detectHandAndDraw(bitmap: Bitmap) = handDetectManager.detectAndDraw(bitmap)
     fun computeHandGesture(angles: List<Double>) = AbstractHandDetectManager.computeHandGesture(angles)
@@ -26,4 +35,6 @@ class MainViewModel(private val repository: HandSelectorRepository,
         return repository.updateHandSelector(canvas, screenSize, result, gesture)
     }
     fun detectYolo(bitmap: Bitmap) = yoloDetectManager.detect(bitmap)
+
+    fun speech(text: String): Boolean = ttsManager.speakText(text)
 }
