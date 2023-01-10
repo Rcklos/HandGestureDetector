@@ -5,7 +5,7 @@ import android.graphics.RectF
 import android.util.Log
 import android.util.Size
 import cn.lentme.hand.detector.entity.HandDetectResult
-import cn.lentme.hand.detector.utils.ImageUtil
+import cn.lentme.hand.detector.util.ImageUtil
 import cn.lentme.mvvm.base.BaseRepository
 
 class HandSelectorRepository: BaseRepository() {

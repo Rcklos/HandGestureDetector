@@ -1,10 +1,8 @@
-package cn.lentme.hand.detector.utils
+package cn.lentme.hand.detector.util
 
 import android.graphics.*
 import android.util.Log
 import android.util.Size
-import androidx.core.view.ContentInfoCompat.Flags
-import cn.lentme.hand.detector.ui.MainActivity
 
 object ImageUtil {
 

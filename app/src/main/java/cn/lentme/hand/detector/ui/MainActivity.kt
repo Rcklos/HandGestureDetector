@@ -12,11 +12,12 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import cn.lentme.hand.detector.app.CameraHelper
 import cn.lentme.hand.detector.databinding.ActivityMainBinding
 import cn.lentme.hand.detector.detect.AbstractYoloDetectManager
 import cn.lentme.hand.detector.entity.Vector2
 import cn.lentme.hand.detector.request.viewmodel.MainViewModel
-import cn.lentme.hand.detector.utils.ImageUtil
+import cn.lentme.hand.detector.util.ImageUtil
 import cn.lentme.mvvm.base.BaseActivity
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import java.util.concurrent.ExecutorService
@@ -29,7 +30,7 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
     override fun fetchBinding() = ActivityMainBinding.inflate(layoutInflater)
     override fun fetchViewModel(): MainViewModel = getViewModel()
 
-    private lateinit var cameraExecutor: ExecutorService
+    private lateinit var cameraHelper: CameraHelper
     private lateinit var bitmapBuffer: Bitmap
 
     // yolo
@@ -44,18 +45,31 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
 
 
     override fun initData() {
-        cameraExecutor = Executors.newSingleThreadExecutor()
+        initCamera()
+    }
+
+    private fun initCamera() {
+        cameraHelper = CameraHelper(
+            this, CameraSelector.DEFAULT_BACK_CAMERA, buildImageAnalyzer()
+        )
         // Request camera permissions
         if (allPermissionsGranted()) {
-            startCamera()
+            cameraHelper.startCamera()
         } else {
-            ActivityCompat.requestPermissions(
-                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+            requestPermissions(REQUIRED_PERMISSIONS) {
+                if (allPermissionsGranted()) {
+                    cameraHelper.startCamera()
+                } else {
+                    Toast.makeText(this,
+                        "Permissions not granted by the user.",
+                        Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
         }
     }
 
     override fun initUI() {
-//        mViewModel.gesture.observe(this) { title = it }
         mViewModel.cropBitmap.observe(this) {
             it?.let {
                 mBinding.mainSelected.setImageBitmap(it)
@@ -70,28 +84,6 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
             }
         }
     }
-
-    private fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            val imageAnalysis = buildImageAnalysis()
-            imageAnalysis.setAnalyzer(cameraExecutor, buildImageAnalyzer())
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-            try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }, ContextCompat.getMainExecutor(this))
-    }
-
-    private fun buildImageAnalysis() = ImageAnalysis.Builder()
-        .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-        .setImageQueueDepth(1)
-        .build()
 
     private fun buildImageAnalyzer() = ImageAnalysis.Analyzer {
         // 获取图片
@@ -210,28 +202,11 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
 
     override fun onDestroy() {
         super.onDestroy()
-        cameraExecutor.shutdown()
+        cameraHelper.shutDown()
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults:
-        IntArray) {
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) {
-                startCamera()
-            } else {
-                Toast.makeText(this,
-                    "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT).show()
-                finish()
-            }
-        }
-    }
-
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(
-            baseContext, it) == PackageManager.PERMISSION_GRANTED
-    }
+    private fun allPermissionsGranted() =
+        isPermissionGranted(REQUIRED_PERMISSIONS)
 
     companion object {
         private const val TAG = "CameraMainActivity"
