@@ -8,20 +8,47 @@ cmake_minimum_required(VERSION 3.10)
 # Declares and names the project.
 project("allncnn")
 
-set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/opencv-mobile-android/sdk/native/jni)
+include_directories(
+        hand
+        yolo
+        struct
+
+        utils
+        utils/bitmap
+        utils/clipper
+        utils/log
+        utils/ocr
+)
+
+# 配置lib include目录
+set(ThirdPartyDir ${CMAKE_SOURCE_DIR}/3rdParty)
+
+# 配置opencv
+set(OpenCV_DIR ${ThirdPartyDir}/opencv-mobile-android/sdk/native/jni)
 find_package(OpenCV REQUIRED core imgproc)
 
-set(ncnn_DIR ${CMAKE_SOURCE_DIR}/ncnn-android-vulkan/${ANDROID_ABI}/lib/cmake/ncnn)
+# 配置ncnn
+set(ncnn_DIR ${ThirdPartyDir}/ncnn-android-vulkan/${ANDROID_ABI}/lib/cmake/ncnn)
 find_package(ncnn REQUIRED)
 
-# Creates and names a library, sets it as either STATIC
-# or SHARED, and provides the relative paths to its source code.
-# You can define multiple libraries, and CMake builds them for you.
-# Gradle automatically packages shared libraries with your APK.
+#自定义搜索规则
+file(GLOB src-files
+        ${CMAKE_SOURCE_DIR}/*.cpp
 
-include_directories(src/include)
-file(GLOB MY_SRC src/source/*.cpp)
-set(SRC_COMPILE_CODE ${MY_SRC})
+        ${CMAKE_SOURCE_DIR}/*/*.cpp
+
+        ${CMAKE_SOURCE_DIR}/*/*/*.cpp
+
+        ${CMAKE_SOURCE_DIR}/*/*/*/*.cpp
+
+        ${CMAKE_SOURCE_DIR}/*/*/*/*/*.cpp
+
+        ${CMAKE_SOURCE_DIR}/*/*/*/*/*/*.cpp
+
+        ${CMAKE_SOURCE_DIR}/*/*/*/*/*/*/*.cpp
+        )
+
+set(SRC_COMPILE_CODE ${src-files})
 
 add_library( # Sets the name of the library.
         allncnn

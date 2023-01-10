@@ -15,6 +15,8 @@ class NCNNService {
     external fun loadYoloDetector(assetManager: AssetManager): Boolean
     external fun detectYolo(bitmap: Bitmap): ArrayList<YoloObject>
 
+    external fun displayPointer(display: Boolean)
+
     companion object {
         // Used to load the 'allncnn' library on application startup.
         init {
