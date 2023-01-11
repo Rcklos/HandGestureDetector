@@ -12,7 +12,7 @@ class HandDetectManager(val service: NCNNService): AbstractHandDetectManager() {
 //        this.service.loadHandDetector(context.assets)
 //    }
 
-    override fun detectAndDraw(bitmap: Bitmap): HandDetectResult {
+    override fun detectHand(bitmap: Bitmap): HandDetectResult {
         val resultBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
         val result = this.service.detectHand(resultBitmap)
         if(result.landmark.isNotEmpty()) {

@@ -1,23 +1,21 @@
 package cn.lentme.hand.detector.detect
 
-import android.content.Context
 import android.graphics.Bitmap
-import cn.lentme.allncnn.NCNNService
 import cn.lentme.hand.detector.entity.HandDetectResult
 import kotlin.math.acos
 import kotlin.math.sqrt
 
 abstract class AbstractHandDetectManager() {
 //    abstract fun detect(bitmap: Bitmap)
-    abstract fun detectAndDraw(bitmap: Bitmap): HandDetectResult
+    abstract fun detectHand(bitmap: Bitmap): HandDetectResult
 
     companion object {
-        protected inline fun isBent(angle: Double, bent: Double): Boolean {
+        protected fun isBent(angle: Double, bent: Double): Boolean {
             return angle > bent
         }
-        protected inline fun isThumbBent(angle: Double): Boolean = isBent(angle, 53.0)
-        protected inline fun isBent(angle: Double): Boolean = isBent(angle, 65.0)
-        protected inline fun isStraight(angle: Double): Boolean = !isBent(angle, 49.0)
+        protected fun isThumbBent(angle: Double): Boolean = isBent(angle, 53.0)
+        protected fun isBent(angle: Double): Boolean = isBent(angle, 65.0)
+        protected fun isStraight(angle: Double): Boolean = !isBent(angle, 49.0)
 
         @JvmStatic
         protected fun computeVectorAngle(v1x: Float, v1y: Float, v2x: Float, v2y: Float): Double {
@@ -33,35 +31,46 @@ abstract class AbstractHandDetectManager() {
         }
 
         fun computeHandGesture(angles: List<Double>): String =
-            if (angles.isEmpty()) "None"
+            if (angles.isEmpty()) GESTURE_NONE
             else if (isThumbBent(angles[0]) && isBent(angles[1]) &&
                 isBent(angles[2]) && isBent(angles[3]) && isBent(angles[4]))
-                "拳头"
+                GESTURE_ZERO
             else if (isThumbBent(angles[0]) && isStraight(angles[1]) &&
                 isBent(angles[2]) && isBent(angles[3]) && isBent(angles[4]))
-                "一"
+                GESTURE_ONE
             else if (isThumbBent(angles[0]) && isStraight(angles[1]) &&
                 isStraight(angles[2]) && isBent(angles[3]) && isBent(angles[4]))
-                "二"
+                GESTURE_TWO
             else if (isThumbBent(angles[0]) && isStraight(angles[1]) &&
                 isStraight(angles[2]) && isStraight(angles[3]) && isBent(angles[4]))
-                "三"
+                GESTURE_THREE
             else if (isThumbBent(angles[0]) && isStraight(angles[1]) &&
                 isStraight(angles[2]) && isStraight(angles[3]) && isStraight(angles[4]))
-                "四"
+                GESTURE_FOUR
             else if (isStraight(angles[0]) && isStraight(angles[1]) &&
                 isStraight(angles[2]) && isStraight(angles[3]) && isStraight(angles[4]))
-                "五"
+                GESTURE_FIVE
             else if(isStraight(angles[0]) && isBent(angles[1]) && isBent(angles[2]) &&
                 isBent(angles[3]) && isStraight(angles[4]))
-                "六"
+                GESTURE_SIX
             else if(isThumbBent(angles[0]) && isBent(angles[1]) && isStraight(angles[2]) &&
                 isBent(angles[3]) && isBent(angles[4]))
                 "友好手势"
             else if (isStraight(angles[0]) && isStraight(angles[1]) &&
                 isBent(angles[2]) && isBent(angles[3]) && isBent(angles[4]))
-                "枪"
+                GESTURE_GUN
             else
-                "Other"
+                GESTURE_OTHER
+
+        const val GESTURE_NONE  = "None"
+        const val GESTURE_ZERO  = "拳头"
+        const val GESTURE_ONE   = "一"
+        const val GESTURE_TWO   = "二"
+        const val GESTURE_THREE = "三"
+        const val GESTURE_FOUR  = "四"
+        const val GESTURE_FIVE  = "五"
+        const val GESTURE_SIX   = "六"
+        const val GESTURE_GUN   = "枪"
+        const val GESTURE_OTHER = "Other"
     }
 }

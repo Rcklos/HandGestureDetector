@@ -19,6 +19,7 @@
 static Hand* g_hand = 0;
 static Yolo* g_yolo = 0;
 static ncnn::Mutex lock;
+static bool draw_on_detect = false;
 
 
 
@@ -123,7 +124,7 @@ jobject detect_hand(JNIEnv *env, jobject thiz, jobject bitmap) {
     if(g_hand) {
         std::vector<PalmObject> objects;
         g_hand->detect(rgb, objects);
-        g_hand->draw(rgb, objects);
+        if(draw_on_detect) g_hand->draw(rgb, objects);
         FiUtils::DrawFps(rgb);
         matToBitmap(env, rgb, bitmap);
 
@@ -187,4 +188,10 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_cn_lentme_allncnn_NCNNService_displayPointer(JNIEnv *env, jobject thiz, jboolean display) {
     // TODO: implement displayPointer()
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_cn_lentme_allncnn_NCNNService_drawOnDetect(JNIEnv *env, jobject thiz, jboolean setup) {
+    draw_on_detect = setup;
 }

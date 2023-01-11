@@ -29,6 +29,12 @@ object ImageUtil {
         canvas.drawArc(left, top, right, bottom, 0f, endAngle, false, paint)
     }
 
+    fun drawRect(bitmap: Bitmap, rectF: RectF) = drawRect(
+        Canvas(bitmap),
+        Size(bitmap.width, bitmap.height),
+        rectF
+    )
+
     fun drawRect(canvas: Canvas, size: Size, rectF: RectF) {
         val dRectF = RectF(
             rectF.left * size.width,
@@ -49,9 +55,10 @@ object ImageUtil {
         return paint
     }
 
-    fun createRotateBitmap(bitmap: Bitmap, rotate: Float): Bitmap {
+    fun createRotateBitmap(bitmap: Bitmap, rotate: Float, flip: Boolean = false): Bitmap {
         val matrix = Matrix()
-        matrix.setRotate(rotate)
+        if(flip) matrix.postScale(1f, -1f)
+        matrix.postRotate(rotate)
         return Bitmap.createBitmap(bitmap, 0, 0,
             bitmap.width, bitmap.height, matrix, true)
     }

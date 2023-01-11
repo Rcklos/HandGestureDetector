@@ -18,7 +18,7 @@ class HandDetectManager(context: Context): AbstractHandDetectManager() {
         detector = HandDetector.create(context)
     }
 
-    override fun detectAndDraw(bitmap: Bitmap): HandDetectResult {
+    override fun detectHand(bitmap: Bitmap): HandDetectResult {
         val landmark = detector.process(bitmap)
         if (landmark.isEmpty()) return HandDetectResult(bitmap, ArrayList(), ArrayList())
         val resultBitmap = showLandmarks(bitmap, landmark)
