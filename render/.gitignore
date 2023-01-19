@@ -1,0 +1,5 @@
+/build
+*.idea
+src/main/cpp/include
+src/main/cpp/3rdParty
+#*/.cxx

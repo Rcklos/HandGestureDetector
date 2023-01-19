@@ -26,7 +26,7 @@ class YoloSelectBoxStateChangeListener: DefaultStateChangeListener() {
         by inject(TtsManager::class.java)
 
     companion object {
-        private val MAX_YOLO_DISPLAY_TIME = 1500L
+        private const val MAX_YOLO_DISPLAY_TIME = 1500L
     }
 
     private object Context {

@@ -9,6 +9,7 @@ import cn.lentme.hand.detector.app.CameraHelper
 import cn.lentme.hand.detector.databinding.ActivityMainBinding
 import cn.lentme.hand.detector.detect.AbstractHandDetectManager
 import cn.lentme.hand.detector.detect.state.HandState
+import cn.lentme.hand.detector.detect.state.listener.ChangeToRenderStateChangeListener
 import cn.lentme.hand.detector.detect.state.listener.YoloSelectBoxStateChangeListener
 import cn.lentme.hand.detector.request.viewmodel.MainViewModel
 import cn.lentme.mvvm.base.BaseActivity
@@ -29,6 +30,10 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
         // 注册手势事件
         handState.registerEvent(AbstractHandDetectManager.GESTURE_ONE,
             YoloSelectBoxStateChangeListener())
+
+        // 注册切换界面的手势
+        handState.registerEvent(AbstractHandDetectManager.GESTURE_SIX,
+            ChangeToRenderStateChangeListener())
     }
 
     private fun initCamera() {

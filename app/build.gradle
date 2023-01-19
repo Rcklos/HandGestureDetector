@@ -61,4 +61,7 @@ dependencies {
 //    implementation project(':handncnn')
     implementation project(':allncnn')
 //    implementation project(':yoloncnn')
+
+    // render
+    implementation project(':render')
 }

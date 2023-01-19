@@ -41,6 +41,7 @@ val repositoryModel = module {
 
 val viewModelModule = module {
     viewModel { MainViewModel(get(), get(), get(), get()) }
+    viewModel { GLRenderViewModel() }
 }
 
 val appModule = listOf(appModel, viewModelModule, repositoryModel)
