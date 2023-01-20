@@ -14,6 +14,7 @@ import android.view.SurfaceView
 import androidx.camera.core.CameraSelector
 import cn.lentme.allncnn.Point2f
 import cn.lentme.gles.render.GL_SIMPLE_CAMERA2
+import cn.lentme.gles.render.GL_SIMPLE_CAMERA4
 import cn.lentme.gles.render.MyNativeRender
 import cn.lentme.gles.render.ui.MyGLSurfaceView
 import cn.lentme.hand.detector.camera.CameraHelper
@@ -60,7 +61,7 @@ class GLRenderActivity: BaseActivity<ActivityRenderBinding, GLRenderViewModel>()
         )
 
         // 初始化OpenGL ES
-        initSurface()
+        initSurface(GL_SIMPLE_CAMERA4)
     }
 
     private fun initCursor() {
@@ -156,6 +157,11 @@ class GLRenderActivity: BaseActivity<ActivityRenderBinding, GLRenderViewModel>()
                     cursor = if((x != -1.0f && y != -1.0f) && lastPoint2f.x != -1.0f) {
                         val dx = (x - lastPoint2f.x)
                         val dy = (y - lastPoint2f.y)
+
+                        runOnUiThread {
+                            mSurface.setDelta(x, y)
+                        }
+
                         var nx = dx + cursor.x
                         if(nx < 0) nx = 0.0f
                         else if(nx > 1.0f) nx = 1.0f
@@ -165,7 +171,12 @@ class GLRenderActivity: BaseActivity<ActivityRenderBinding, GLRenderViewModel>()
 //                        Log.d(TAG, "cursor: x = ${cursor.x}, y = ${cursor.y}, dx = $dx, dy = $dy")
                         Point2f(nx, ny)
 //                        Point2f(x, y)
-                    } else cursor
+                    } else {
+                        runOnUiThread {
+                            mSurface.setDelta(-1.0f, -1.0f)
+                        }
+                        cursor
+                    }
                     lastPoint2f = Point2f(x, y)
                 }
                 if (isVisible)
@@ -180,11 +191,33 @@ class GLRenderActivity: BaseActivity<ActivityRenderBinding, GLRenderViewModel>()
         override fun process(bitmap: Bitmap) {
             // 检测手
             val result = handDetector.detect(bitmap)
-            if(result.points.isNotEmpty() && AbstractHandDetectManager.computeHandGesture(result.angles)
-                == AbstractHandDetectManager.GESTURE_ONE) {
-                queue.offer(Point2f(result.points[8].x, result.points[8].y))
+            if(result.points.isNotEmpty()) {
+                val gesture = AbstractHandDetectManager.computeHandGesture(result.angles)
+                if(gesture == AbstractHandDetectManager.GESTURE_ONE)
+                    queue.offer(Point2f(result.points[8].x, result.points[8].y))
+                else
+                    queue.offer(Point2f(-1.0f, -1.0f))
+
+                if(gesture == AbstractHandDetectManager.GESTURE_FIVE) {
+                    runOnUiThread {
+                        mSurface.setDirection(MyGLSurfaceView.DIRECTION_UP)
+                    }
+                }
+                else if(gesture == AbstractHandDetectManager.GESTURE_ZERO) {
+                    runOnUiThread {
+                        mSurface.setDirection(MyGLSurfaceView.DIRECTION_DOWN)
+                    }
+                }
+                else {
+                    runOnUiThread {
+                        mSurface.setDirection(MyGLSurfaceView.DIRECTION_NONE)
+                    }
+                }
             } else {
                 queue.offer(Point2f(-1.0f, -1.0f))
+                runOnUiThread {
+                    mSurface.setDirection(MyGLSurfaceView.DIRECTION_NONE)
+                }
             }
             runOnUiThread {
                 mBinding.imageTest.setImageBitmap(result.bitmap)
