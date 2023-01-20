@@ -120,6 +120,5 @@ void SimpleCamera4::SetDirection(int dir) {
 void SimpleCamera4::SetDelta(float x, float y) {
     GLBaseSample::SetDelta(x, y);
     mDelta = { x, y };
-    LOGD("delta: %.2f, %.2f", x, y);
 }
 

@@ -6,7 +6,8 @@ import cn.lentme.hand.detector.detect.AbstractHandDetectManager
 import cn.lentme.hand.detector.entity.HandDetectResult
 
 class HandState {
-    private object StateContext {
+
+    private inner class StateContext {
         // 状态
         var state: Int = STATE_IDLE
         // 手势事件
@@ -21,7 +22,9 @@ class HandState {
         var refreshEventTime = 0L
     }
 
-    private fun refreshContext() = StateContext.apply {
+    private val stateContext = StateContext()
+
+    private fun refreshContext() = stateContext.apply {
         state = STATE_IDLE
         eventMap.clear()
 
@@ -35,13 +38,13 @@ class HandState {
     }
 
     fun registerEvent(gesture: String, listener: StateChangeListener) {
-        StateContext.apply {
+        stateContext.apply {
             eventMap[gesture] = listener
         }
     }
 
     fun process(updateData: UpdateData) {
-        when(StateContext.state) {
+        when(stateContext.state) {
             STATE_IDLE -> processIdle(updateData)
             STATE_CONSUMING -> processConsume(updateData)
             else -> {
@@ -50,14 +53,14 @@ class HandState {
         }
     }
 
-    private fun processConsume(updateData: UpdateData) = StateContext.apply {
+    private fun processConsume(updateData: UpdateData) = stateContext.apply {
         if(!eventMap[event]!!.consume(updateData)) {
             event = ""
             state = STATE_IDLE
         }
     }
 
-    private fun processIdle(updateData: UpdateData) = StateContext.apply {
+    private fun processIdle(updateData: UpdateData) = stateContext.apply {
         val bitmap  = updateData.bitmap
         val result  = updateData.result
         val angles  = result.angles

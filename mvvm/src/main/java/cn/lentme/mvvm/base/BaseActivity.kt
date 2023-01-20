@@ -31,13 +31,17 @@ abstract class BaseActivity<T: ViewBinding, VM: BaseViewModel>: AppCompatActivit
         _binding = fetchBinding()
         setContentView(_binding.root)
 
-        // 设置activity
-        (application as BaseApplication).activity = this
 
         _viewModel = fetchViewModel()
 
         initUI()
         initData()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 设置activity
+        (application as BaseApplication).activity = this
     }
 
     protected fun requestPermissions(

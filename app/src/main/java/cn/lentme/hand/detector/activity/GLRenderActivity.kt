@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import cn.lentme.allncnn.Point2f
 import cn.lentme.gles.render.GL_SIMPLE_CAMERA2
@@ -22,6 +23,8 @@ import cn.lentme.hand.detector.camera.CameraLifecycle
 import cn.lentme.hand.detector.databinding.ActivityRenderBinding
 import cn.lentme.hand.detector.detect.AbstractHandDetectManager
 import cn.lentme.hand.detector.detect.HandDetectManager
+import cn.lentme.hand.detector.detect.state.DefaultStateChangeListener
+import cn.lentme.hand.detector.detect.state.HandState
 import cn.lentme.hand.detector.request.viewmodel.GLRenderViewModel
 import cn.lentme.mvvm.base.BaseActivity
 import org.koin.android.ext.android.inject
@@ -47,6 +50,8 @@ class GLRenderActivity: BaseActivity<ActivityRenderBinding, GLRenderViewModel>()
     private lateinit var cameraHelper: CameraHelper
     private val lifecycle = CameraLifecycle()
 
+    private val handState = HandState()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // set view
@@ -62,6 +67,17 @@ class GLRenderActivity: BaseActivity<ActivityRenderBinding, GLRenderViewModel>()
 
         // 初始化OpenGL ES
         initSurface(GL_SIMPLE_CAMERA4)
+
+        // 注册退出事件
+        handState.registerEvent(AbstractHandDetectManager.GESTURE_SIX,
+            object: DefaultStateChangeListener() {
+                override fun consume(updateData: HandState.UpdateData): Boolean {
+                    runOnUiThread {
+                        finish()
+                    }
+                    return false
+                }
+        })
     }
 
     private fun initCursor() {
@@ -219,6 +235,13 @@ class GLRenderActivity: BaseActivity<ActivityRenderBinding, GLRenderViewModel>()
                     mSurface.setDirection(MyGLSurfaceView.DIRECTION_NONE)
                 }
             }
+
+            // 退出状态监听
+            handState.process(
+                HandState.UpdateData(
+                result.bitmap, result
+            ))
+
             runOnUiThread {
                 mBinding.imageTest.setImageBitmap(result.bitmap)
             }
