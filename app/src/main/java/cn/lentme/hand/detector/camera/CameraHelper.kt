@@ -1,4 +1,4 @@
-package cn.lentme.hand.detector.app
+package cn.lentme.hand.detector.camera
 
 import android.Manifest
 import android.graphics.Bitmap
@@ -6,15 +6,16 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageAnalysis.Analyzer
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
+import cn.lentme.hand.detector.app.App
 import cn.lentme.hand.detector.util.ImageUtil
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class CameraHelper(
-    private val activity: AppCompatActivity,
+    private val lifecycle: LifecycleOwner,
     private val cameraSelector: CameraSelector,
     private val processor: Processor
     ) {
@@ -27,8 +28,8 @@ class CameraHelper(
         fun process(bitmap: Bitmap)
     }
 
-    fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(activity)
+    fun bindCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(App.instance)
         cameraProviderFuture.addListener({
             // 摄像头提供
             val cameraProvider = cameraProviderFuture.get()
@@ -52,11 +53,11 @@ class CameraHelper(
             try {
                 cameraProvider.unbindAll()
                 // 绑定生命周期
-                cameraProvider.bindToLifecycle(activity, cameraSelector, imageAnalysis)
+                cameraProvider.bindToLifecycle(lifecycle, cameraSelector, imageAnalysis)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }, ContextCompat.getMainExecutor(activity))
+        }, ContextCompat.getMainExecutor(App.instance))
     }
 
     fun shutDown() {

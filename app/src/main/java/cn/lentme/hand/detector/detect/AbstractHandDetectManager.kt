@@ -7,7 +7,7 @@ import kotlin.math.sqrt
 
 abstract class AbstractHandDetectManager() {
 //    abstract fun detect(bitmap: Bitmap)
-    abstract fun detectHand(bitmap: Bitmap): HandDetectResult
+    abstract fun detect(bitmap: Bitmap): HandDetectResult
 
     companion object {
         protected fun isBent(angle: Double, bent: Double): Boolean {

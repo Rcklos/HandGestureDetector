@@ -19,7 +19,7 @@
 static Hand* g_hand = 0;
 static Yolo* g_yolo = 0;
 static ncnn::Mutex lock;
-static bool draw_on_detect = false;
+static bool draw_on_detect = true;
 
 
 

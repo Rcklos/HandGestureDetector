@@ -6,13 +6,13 @@ import cn.lentme.allncnn.Point2f
 import cn.lentme.hand.detector.entity.HandDetectResult
 import cn.lentme.hand.detector.entity.Vector2
 
-class HandDetectManager(val service: NCNNService): AbstractHandDetectManager() {
+class HandDetectManager(private val service: NCNNService): AbstractHandDetectManager() {
 
 //    init {
 //        this.service.loadHandDetector(context.assets)
 //    }
 
-    override fun detectHand(bitmap: Bitmap): HandDetectResult {
+    override fun detect(bitmap: Bitmap): HandDetectResult {
         val resultBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
         val result = this.service.detectHand(resultBitmap)
         if(result.landmark.isNotEmpty()) {

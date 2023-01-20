@@ -26,7 +26,7 @@ class MainViewModel(private val repository: HandSelectorRepository,
         }
     }
 
-    fun detectHand(bitmap: Bitmap) = handDetectManager.detectHand(bitmap)
+    fun detectHand(bitmap: Bitmap) = handDetectManager.detect(bitmap)
     fun computeHandGesture(angles: List<Double>) = AbstractHandDetectManager.computeHandGesture(angles)
     fun updateHandSelector(bitmap: Bitmap, result: HandDetectResult,
                            gesture: String): RectF? {

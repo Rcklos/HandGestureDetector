@@ -3,9 +3,11 @@ package cn.lentme.hand.detector.activity
 import android.Manifest
 import android.graphics.Bitmap
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
-import cn.lentme.hand.detector.app.CameraHelper
+import cn.lentme.hand.detector.camera.CameraHelper
+import cn.lentme.hand.detector.camera.CameraLifecycle
 import cn.lentme.hand.detector.databinding.ActivityMainBinding
 import cn.lentme.hand.detector.detect.AbstractHandDetectManager
 import cn.lentme.hand.detector.detect.state.HandState
@@ -21,8 +23,9 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
     override fun fetchViewModel(): MainViewModel = getViewModel()
 
     private lateinit var cameraHelper: CameraHelper
+    private lateinit var lifecycle: CameraLifecycle
 
-    private val handState: HandState by inject()
+    private val handState: HandState = HandState()
 
     override fun initData() {
         initCamera()
@@ -37,16 +40,24 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
     }
 
     private fun initCamera() {
+        lifecycle = CameraLifecycle()
         cameraHelper = CameraHelper(
-            this, CameraSelector.DEFAULT_FRONT_CAMERA, buildProcessor()
+            lifecycle, CameraSelector.DEFAULT_BACK_CAMERA, buildProcessor()
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        lifecycle.cameraOnCreate()
+        lifecycle.cameraOnStart()
+        lifecycle.cameraOnResume()
         // Request camera permissions
         if (allPermissionsGranted()) {
-            cameraHelper.startCamera()
+            cameraHelper.bindCamera()
         } else {
             requestPermissions(REQUIRED_PERMISSIONS) {
                 if (allPermissionsGranted()) {
-                    cameraHelper.startCamera()
+                    cameraHelper.bindCamera()
                 } else {
                     Toast.makeText(this,
                         "Permissions not granted by the user.",
@@ -55,6 +66,18 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        lifecycle.cameraOnPause()
+        lifecycle.cameraOnStop()
+        lifecycle.cameraOnDestroyed()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cameraHelper.shutDown()
     }
 
     override fun initUI() {
@@ -82,11 +105,6 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {
                 mBinding.mainSurface.setImageBitmap(resultBitmap)
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        cameraHelper.shutDown()
     }
 
     private fun allPermissionsGranted() =
