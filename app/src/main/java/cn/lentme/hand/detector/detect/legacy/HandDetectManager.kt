@@ -12,7 +12,7 @@ import cn.lentme.mediapipe.handlandmark.HandDetector
 import cn.lentme.mediapipe.handlandmark.data.HandLandmark
 
 class HandDetectManager(context: Context): AbstractHandDetectManager() {
-    private lateinit var detector: HandDetector
+    private var detector: HandDetector
 
     init {
         detector = HandDetector.create(context)

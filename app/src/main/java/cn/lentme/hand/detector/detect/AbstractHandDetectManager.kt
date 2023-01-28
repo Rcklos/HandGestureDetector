@@ -5,7 +5,7 @@ import cn.lentme.hand.detector.entity.HandDetectResult
 import kotlin.math.acos
 import kotlin.math.sqrt
 
-abstract class AbstractHandDetectManager() {
+abstract class AbstractHandDetectManager {
 //    abstract fun detect(bitmap: Bitmap)
     abstract fun detect(bitmap: Bitmap): HandDetectResult
 

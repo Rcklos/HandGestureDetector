@@ -84,7 +84,7 @@ object ImageUtil {
         des.bottom = src.bottom
     }
 
-    fun computeRealRectF(rectF: RectF, size: Size): RectF {
+    private fun computeRealRectF(rectF: RectF, size: Size): RectF {
         return RectF(
             rectF.left * size.width,
             rectF.top * size.height,
@@ -93,8 +93,8 @@ object ImageUtil {
         )
     }
 
-    fun logRectF(TAG: String, name: String, rectF: RectF) {
-        Log.d(TAG, "$name ---------> l: ${rectF.left}, t: ${rectF.top}, " +
-                "r: ${rectF.right}, b: ${rectF.bottom}")
-    }
+//    fun logRectF(TAG: String, name: String, rectF: RectF) {
+//        Log.d(TAG, "$name ---------> l: ${rectF.left}, t: ${rectF.top}, " +
+//                "r: ${rectF.right}, b: ${rectF.bottom}")
+//    }
 }

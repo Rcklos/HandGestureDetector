@@ -15,7 +15,7 @@ class TtsManager(context: Context) {
         if(!mInited) return false
         var result = TextToSpeech.ERROR
         mSpeech?.run {
-            result = speak(text, TextToSpeech.QUEUE_FLUSH, null, "");
+            result = speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
         }
         return result == TextToSpeech.SUCCESS
     }
@@ -43,7 +43,6 @@ class TtsManager(context: Context) {
                         mSpeechListener?.apply { onDone(utteranceId) }
                     }
 
-                    @Deprecated("Deprecated in Java")
                     override fun onError(utteranceId: String?) {
                         mSpeechListener?.apply { onError(utteranceId) }
                     }

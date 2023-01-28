@@ -11,13 +11,14 @@ import android.os.Bundle
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import cn.lentme.allncnn.Point2f
 import cn.lentme.gles.render.GL_SIMPLE_CAMERA2
 import cn.lentme.gles.render.GL_SIMPLE_CAMERA4
 import cn.lentme.gles.render.MyNativeRender
 import cn.lentme.gles.render.ui.MyGLSurfaceView
+import cn.lentme.hand.detector.app.App
+import cn.lentme.hand.detector.app.TtsManager
 import cn.lentme.hand.detector.camera.CameraHelper
 import cn.lentme.hand.detector.camera.CameraLifecycle
 import cn.lentme.hand.detector.databinding.ActivityRenderBinding
@@ -31,7 +32,6 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.locks.ReentrantLock
 
 class GLRenderActivity: BaseActivity<ActivityRenderBinding, GLRenderViewModel>() {
 
@@ -46,6 +46,7 @@ class GLRenderActivity: BaseActivity<ActivityRenderBinding, GLRenderViewModel>()
 
     private val queue = ConcurrentLinkedQueue<Point2f>()
     private val handDetector: HandDetectManager by inject()
+    private val ttsManager: TtsManager by inject()
 
     private lateinit var cameraHelper: CameraHelper
     private val lifecycle = CameraLifecycle()
@@ -72,7 +73,8 @@ class GLRenderActivity: BaseActivity<ActivityRenderBinding, GLRenderViewModel>()
         handState.registerEvent(AbstractHandDetectManager.GESTURE_SIX,
             object: DefaultStateChangeListener() {
                 override fun consume(updateData: HandState.UpdateData): Boolean {
-                    runOnUiThread {
+                    App.instance.activity!!.runOnUiThread {
+                        ttsManager.speakText("正在退出看房模式")
                         finish()
                     }
                     return false
@@ -214,19 +216,21 @@ class GLRenderActivity: BaseActivity<ActivityRenderBinding, GLRenderViewModel>()
                 else
                     queue.offer(Point2f(-1.0f, -1.0f))
 
-                if(gesture == AbstractHandDetectManager.GESTURE_FIVE) {
-                    runOnUiThread {
-                        mSurface.setDirection(MyGLSurfaceView.DIRECTION_UP)
+                when (gesture) {
+                    AbstractHandDetectManager.GESTURE_FIVE -> {
+                        runOnUiThread {
+                            mSurface.setDirection(MyGLSurfaceView.DIRECTION_UP)
+                        }
                     }
-                }
-                else if(gesture == AbstractHandDetectManager.GESTURE_ZERO) {
-                    runOnUiThread {
-                        mSurface.setDirection(MyGLSurfaceView.DIRECTION_DOWN)
+                    AbstractHandDetectManager.GESTURE_ZERO -> {
+                        runOnUiThread {
+                            mSurface.setDirection(MyGLSurfaceView.DIRECTION_DOWN)
+                        }
                     }
-                }
-                else {
-                    runOnUiThread {
-                        mSurface.setDirection(MyGLSurfaceView.DIRECTION_NONE)
+                    else -> {
+                        runOnUiThread {
+                            mSurface.setDirection(MyGLSurfaceView.DIRECTION_NONE)
+                        }
                     }
                 }
             } else {

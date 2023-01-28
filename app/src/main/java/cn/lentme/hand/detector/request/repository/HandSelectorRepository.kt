@@ -13,7 +13,6 @@ class HandSelectorRepository: BaseRepository() {
         const val TAG = "MainStatus"
         const val Idle = 0
         const val Select = 1
-        const val Confirm = 2
     }
 
     private var status = Idle

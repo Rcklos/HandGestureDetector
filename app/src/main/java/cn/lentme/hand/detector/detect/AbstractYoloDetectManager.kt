@@ -20,13 +20,13 @@ abstract class AbstractYoloDetectManager() {
             "滑板", "冲浪板",
             "tennis racket", "瓶子", "酒杯", "被子", "fork", "小刀", "spoon", "bowl",
             "香蕉", "苹果",
-            "sandwich", "橘子", "broccoli", "carrot", "热狗", "披萨", "donut", "cake",
+            "sandwich", "橘子", "broccoli", "carrot", "热狗", "披萨", "donut", "蛋糕",
             "椅子", "couch",
-            "potted plant", "床", "餐桌", "toilet", "屏幕", "laptop", "鼠标", "remote",
+            "potted plant", "床", "餐桌", "toilet", "屏幕", "笔记本", "鼠标", "remote",
             "键盘", "手机",
-            "microwave", "oven", "toaster", "sink", "refrigerator", "书", "闹钟", "花瓶",
+            "微波炉", "oven", "toaster", "sink", "冰箱", "书", "闹钟", "花瓶",
             "剪刀", "teddy bear",
-            "hair drier", "toothbrush"
+            "吹风机", "牙刷"
         )
     }
 }

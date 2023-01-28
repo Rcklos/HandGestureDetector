@@ -3,7 +3,6 @@ package cn.lentme.hand.detector.activity
 import android.Manifest
 import android.graphics.Bitmap
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import cn.lentme.hand.detector.camera.CameraHelper
@@ -15,7 +14,6 @@ import cn.lentme.hand.detector.detect.state.listener.ChangeToRenderStateChangeLi
 import cn.lentme.hand.detector.detect.state.listener.YoloSelectBoxStateChangeListener
 import cn.lentme.hand.detector.request.viewmodel.MainViewModel
 import cn.lentme.mvvm.base.BaseActivity
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 
 class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>() {

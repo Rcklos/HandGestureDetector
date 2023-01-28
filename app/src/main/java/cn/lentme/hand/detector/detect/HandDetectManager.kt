@@ -31,7 +31,6 @@ class HandDetectManager(private val service: NCNNService): AbstractHandDetectMan
     }
 
     companion object {
-        private const val TAG = "HandDetectManager"
         private fun computeHandAngle(landmarks: List<Point2f>): List<Double> {
             val angles = ArrayList<Double>()
             if (landmarks.isEmpty()) return angles

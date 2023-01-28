@@ -1,8 +1,6 @@
 package cn.lentme.hand.detector.detect
 
 import android.graphics.Bitmap
-import android.graphics.RectF
-import android.util.Size
 import cn.lentme.allncnn.NCNNService
 import cn.lentme.hand.detector.entity.YoloDetectResult
 
